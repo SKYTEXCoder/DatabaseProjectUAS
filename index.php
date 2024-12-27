@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST["action"] ?? 'back';
     switch ($action) {
         case 'statistik_lima_serangkai':
-            $sql = "SELECT MIN(ukt) AS Minimum, MAX(ukt) AS Maximum, SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', FLOOR(25/100 * COUNT(*))), ',', -1) AS Q1, SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', FLOOR(50/100 * COUNT(*))), ',', -1) AS Q2, SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', FLOOR(75/100 * COUNT(*))), ',', -1) AS Q3 FROM mahasiswa";
+            $sql = "SELECT MIN(ukt) AS Minimum, MAX(ukt) AS Maximum, SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', ROUND(25/100 * (COUNT(*) + 1))), ',', -1) AS Q1, SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', ROUND(50/100 * (COUNT(*) + 1))), ',', -1) AS Q2, SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', ROUND(75/100 * (COUNT(*) + 1))), ',', -1) AS Q3 FROM mahasiswa";
             $result = mysqli_query($conn, $sql);
             $statistics = mysqli_fetch_assoc($result);
             $all_mahasiswas = [];
@@ -36,10 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             FROM mahasiswa m
             JOIN (
                 SELECT 
-                    SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', 25/100 * COUNT(*)), ',', -1) AS Q1,
-                    SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', 75/100 * COUNT(*)), ',', -1) AS Q3,
-                    (SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', 75/100 * COUNT(*)), ',', -1) - 
-                    SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', 25/100 * COUNT(*)), ',', -1)) AS IQR
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', ROUND(25/100 * (COUNT(*) + 1))), ',', -1) AS Q1,
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', ROUND(75/100 * (COUNT(*) + 1))), ',', -1) AS Q3,
+                    (SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', ROUND(75/100 * (COUNT(*) + 1))), ',', -1) - 
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(ukt ORDER BY ukt), ',', ROUND(25/100 * (COUNT(*) + 1))), ',', -1)) AS IQR
                 FROM mahasiswa
             ) iqr ON 1=1
             WHERE m.ukt > (iqr.Q3 + 1.5 * iqr.IQR) OR m.ukt < (iqr.Q1 - 1.5 * iqr.IQR)
@@ -62,13 +62,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         case 'back':
         default:
-            $sql = "SELECT * FROM mahasiswa ORDER BY id DESC";
+            $sql = "SELECT * FROM mahasiswa ORDER BY id ASC";
             $result = mysqli_query($conn, $sql);
             $all_mahasiswas = mysqli_fetch_all($result, MYSQLI_ASSOC);
             break;
     }
 } else {
-    $sql = "SELECT * FROM mahasiswa ORDER BY id DESC";
+    $sql = "SELECT * FROM mahasiswa ORDER BY id ASC";
     $result = mysqli_query($conn, $sql);
     $all_mahasiswas = mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
