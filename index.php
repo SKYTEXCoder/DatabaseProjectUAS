@@ -293,7 +293,7 @@ function register(): void
                     echo "<td>Rp " . number_format($statistics['Maximum'], 0, ',', '.') . "</td></tr>";
                 } elseif (isset($stddev)) {
                     // Display Standard Deviation
-                    echo "<tr><td>Rp " . number_format($stddev, 0, ',', '.') . "</td></tr>";
+                    echo "<tr><td>Rp " . number_format($stddev, 12, ',', '.') . "</td></tr>";
                 } elseif (isset($pencilan)) {
                     // Display rows from mahasiswa or pencilan
                     foreach ($pencilan as $pencilan_mahasiswa) {
